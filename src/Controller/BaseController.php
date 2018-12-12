@@ -310,7 +310,7 @@ abstract class BaseController extends AbstractController
 
     protected function setAtiStatsExtraLabels(array $labels): void
     {
-        $this->atistatsExtraLabels = $labels;
+        $this->atistatsExtraLabels = array_replace($this->istatsExtraLabels, $labels);
     }
 
     protected function setAtiContentId(?string $identifier, string $authority = 'pips'): void
