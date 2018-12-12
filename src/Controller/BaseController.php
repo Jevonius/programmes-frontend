@@ -308,7 +308,7 @@ abstract class BaseController extends AbstractController
         $this->istatsExtraLabels = array_replace($this->istatsExtraLabels, $labels);
     }
 
-    protected function setAtiStatsExtraLabels(array $labels): void
+    protected function addAtiStatsExtraLabels(array $labels): void
     {
         $this->atistatsExtraLabels = array_replace($this->atistatsExtraLabels, $labels);
     }
