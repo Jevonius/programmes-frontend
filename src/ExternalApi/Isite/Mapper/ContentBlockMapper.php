@@ -219,7 +219,7 @@ class ContentBlockMapper extends Mapper
                 $validClipsPids = [];
                 foreach ($contentBlockData->clips as $clip) {
                     if (isset($this->clips[$this->getString($clip->pid)])) {
-                        $validClipsPids[] = $clip->pid;
+                        $validClipsPids[] = $this->getString($clip->pid);
                     }
                 }
                 // if there is more than 1 valid clip, use the multi carousel
@@ -242,17 +242,20 @@ class ContentBlockMapper extends Mapper
 
                     break;
                 }
-                // Content block with single playable clip
-                $clipIndex = $this->getString($contentBlockData->clips->pid);
-                if (isset($this->clips[$clipIndex])) {
-                    $contentBlock = new ClipStandAlone(
-                        $this->getString($contentBlockData->title),
-                        $this->getString($contentBlockData->clips->caption),
-                        $this->clips[$clipIndex],
-                        $this->streamableVersions[$this->getString($contentBlockData->clips->pid)] ?? null
-                    );
+                // Content block with single playable clip. This needs a loop because there could be more than one
+                // clips in iSite response but only one is valid
+                foreach ($contentBlockData->clips as $isiteClip) {
+                    $clipIndex = $this->getString($isiteClip->pid);
+                    if (isset($this->clips[$clipIndex])) {
+                        $contentBlock = new ClipStandAlone(
+                            $this->getString($contentBlockData->title),
+                            $this->getString($isiteClip->caption),
+                            $this->clips[$clipIndex],
+                            $this->streamableVersions[$this->getString($isiteClip->pid)] ?? null
+                        );
+                        break;
+                    }
                 }
-
                 break;
             case 'promotions':
                 $contentBlockData = $form->content;
