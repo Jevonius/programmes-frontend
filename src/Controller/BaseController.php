@@ -315,7 +315,7 @@ abstract class BaseController extends AbstractController
 
     protected function setAtiContentId(?string $identifier, string $authority = 'pips'): void
     {
-        if($identifier) {
+        if ($identifier) {
             $identifier = ':' . $identifier;
         }
         $this->atiContentId = 'urn:bbc:' . $authority . $identifier;
