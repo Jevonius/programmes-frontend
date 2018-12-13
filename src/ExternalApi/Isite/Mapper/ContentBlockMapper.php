@@ -45,9 +45,6 @@ class ContentBlockMapper extends Mapper
     /** @var VersionsService */
     private $versionsService;
 
-    /** @var LoggerInterface */
-    private $logger;
-
     /**
      * All available clip will be set here at once so we don't need to query the DB or Redis multiple times
      *
@@ -74,12 +71,11 @@ class ContentBlockMapper extends Mapper
         VersionsService $versionsService,
         LoggerInterface $logger
     ) {
-        parent::__construct($mapperFactory, $isiteKeyHelper);
+        parent::__construct($mapperFactory, $isiteKeyHelper, $logger);
         $this->coreEntitiesService = $coreEntitiesService;
         $this->idtQuizService = $idtQuizService;
         $this->programmesService = $programmesService;
         $this->versionsService = $versionsService;
-        $this->logger = $logger;
     }
 
     /**
@@ -182,10 +178,12 @@ class ContentBlockMapper extends Mapper
                         $galleries[] = $this->galleries[$galleryPid];
                     }
                 }
-                $contentBlock = new Galleries(
-                    $this->getString($contentBlockData->title),
-                    $galleries
-                );
+                if (count($galleries)) {
+                    $contentBlock = new Galleries(
+                        $this->getString($contentBlockData->title),
+                        $galleries
+                    );
+                }
                 break;
             case 'image':
                 $contentBlockData = $form->content;
@@ -212,49 +210,53 @@ class ContentBlockMapper extends Mapper
                 break;
             case 'clips':
                 $contentBlockData = $form->content;
-                if (count($contentBlockData->clips) > 1) {
-                    $streamableItems = [];
+                // valid clips are already preloaded, compare the iSite results with the preloaded clips in order to
+                // have a list of all valid clips and determinate if we should display single clip or multi clip carouse
+                $validClipsPids = [];
+                foreach ($contentBlockData->clips as $clip) {
+                    if (isset($this->clips[$this->getString($clip->pid)])) {
+                        $validClipsPids[] = $this->getString($clip->pid);
+                    }
+                }
+                // if there is more than 1 valid clip, use the multi carousel
+                if (count($validClipsPids) > 1) {
+                    $streamItems = [];
                     foreach ($contentBlockData->clips as $isiteClip) {
-                        if (isset($this->streamableVersions[$this->getString($isiteClip->pid)])) {
-                            $streamableItems[] = new StreamItem(
+                        $clipIndex = $this->getString($isiteClip->pid);
+                        if (isset($this->clips[$clipIndex])) {
+                            $streamItems[] = new StreamItem(
                                 $this->getString($isiteClip->caption),
-                                $this->clips[$this->getString($isiteClip->pid)]
+                                $this->clips[$clipIndex]
                             );
                         }
                     }
-
-                    if (count($streamableItems) > 1) {
-                        $contentBlock = new ClipStream(
-                            $this->getString($contentBlockData->title),
-                            $streamableItems
-                        );
-                    } elseif (count($streamableItems) == 1) {
-                        $contentBlock = new ClipStandAlone(
-                            $this->getString($contentBlockData->title),
-                            $streamableItems[0]->getTitle(),
-                            $streamableItems[0]->getClip(),
-                            $this->streamableVersions[(string) $streamableItems[0]->getClip()->getPid()]
-                        );
-                    }
+                    // Content block with multiple clips in a carousel
+                    $contentBlock = new ClipStream(
+                        $this->getString($contentBlockData->title),
+                        $streamItems
+                    );
 
                     break;
                 }
-
-                // is not possible to create a block without one clip at least
-                if (isset($this->streamableVersions[$this->getString($contentBlockData->clips->pid)])) {
-                    $contentBlock = new ClipStandAlone(
-                        $this->getString($contentBlockData->title),
-                        $this->getString($contentBlockData->clips->caption),
-                        $this->clips[$this->getString($contentBlockData->clips->pid)],
-                        $this->streamableVersions[$this->getString($contentBlockData->clips->pid)]
-                    );
+                // Content block with single playable clip. This needs a loop because there could be more than one
+                // clips in iSite response but only one is valid
+                foreach ($contentBlockData->clips as $isiteClip) {
+                    $clipIndex = $this->getString($isiteClip->pid);
+                    if (isset($this->clips[$clipIndex])) {
+                        $contentBlock = new ClipStandAlone(
+                            $this->getString($contentBlockData->title),
+                            $this->getString($isiteClip->caption),
+                            $this->clips[$clipIndex],
+                            $this->streamableVersions[$this->getString($isiteClip->pid)] ?? null
+                        );
+                        break;
+                    }
                 }
-
                 break;
             case 'promotions':
                 $contentBlockData = $form->content;
                 $title = $this->getString($contentBlockData->title);
-                $layout = $this->getString($contentBlockData->layout);
+                $layout = $this->getString($contentBlockData->layout) ?: 'list'; // Default to list if unset
                 $promotions = [];
                 foreach ($contentBlockData->promotions as $promotion) {
                     // @codingStandardsIgnoreStart

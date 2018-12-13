@@ -9,14 +9,25 @@ use App\Ds2013\Presenters\Utilities\Paginator\PaginatorPresenter;
 use App\ExternalApi\Isite\Domain\Profile;
 use App\ExternalApi\Isite\IsiteResult;
 use App\ExternalApi\Isite\Service\ProfileService;
+use BBC\ProgrammesPagesService\Domain\Entity\Group;
 use BBC\ProgrammesPagesService\Domain\ValueObject\Pid;
 use BBC\ProgrammesPagesService\Service\CoreEntitiesService;
+use GuzzleHttp\Promise\FulfilledPromise;
 use Symfony\Component\HttpFoundation\Request;
 
 class ShowController extends BaseController
 {
-    public function __invoke(string $key, string $slug, Request $request, ProfileService $isiteService, IsiteKeyHelper $isiteKeyHelper, CoreEntitiesService $coreEntitiesService)
-    {
+    private const MAX_LIST_DISPLAYED_ITEMS = 48;
+
+    public function __invoke(
+        string $key,
+        string $slug,
+        Request $request,
+        ProfileService $isiteService,
+        IsiteKeyHelper $isiteKeyHelper,
+        CoreEntitiesService $coreEntitiesService
+    ) {
+        $this->setIstatsProgsPageType('profiles_index');
         $preview = false;
         if ($request->query->has('preview') && $request->query->get('preview')) {
             $preview = true;
@@ -30,6 +41,7 @@ class ShowController extends BaseController
         $this->setAtiContentId($guid, 'isite2');
         /** @var IsiteResult $isiteResult */
         $isiteResult = $isiteService->getByContentId($guid, $preview)->wait(true);
+
         /** @var Profile $profile */
         $profiles = $isiteResult->getDomainModels();
         if (!$profiles) {
@@ -42,15 +54,23 @@ class ShowController extends BaseController
             return $this->redirectWith($profile->getKey(), $profile->getSlug(), $preview);
         }
 
+        if ($profile->getBbcSite()) {
+            $this->setIstatsExtraLabels(['bbc_site' => $profile->getBbcSite()]);
+        }
         $context = null;
-        if ('' !== $profile->getParentPid()) {
-            $context = $coreEntitiesService->findByPidFull(new Pid($profile->getParentPid()));
-
-            if ($context && $profile->getProjectSpace() !== $context->getOption('project_space')) {
+        $parentProgramme = null;
+        $projectSpace = $profile->getProjectSpace();
+        if (!empty($profile->getParentPid())) {
+            $context = $coreEntitiesService->findByPidFull($profile->getParentPid());
+            if ($context instanceof Group) {
+                $parentProgramme = $context->getParent();
+            } else {
+                $parentProgramme = $context;
+            }
+            if ($context && ($profile->getProjectSpace() !== $context->getOption('project_space'))) {
                 throw $this->createNotFoundException('Project space Profile-Programme not matching');
             }
         }
-
         $this->setContext($context);
         $this->setAtiContentId($guid, 'isite2');
 
@@ -58,28 +78,50 @@ class ShowController extends BaseController
             $this->setBrandingId($profile->getBrandingId());
         }
 
-        if ($profile->isIndividual()) {
-            $extraProfiles = $profile->getParents();
-            $siblingPromise = $isiteService->setChildrenOn($extraProfiles, $profile->getProjectSpace());
-            $this->resolvePromises([$siblingPromise]);
-            return $this->renderWithChrome('profiles/individual.html.twig', ['profile' => $profile, 'programme' => $context]);
+        // Calculate siblings display
+        $siblingsPromise = new FulfilledPromise(null);
+        if ($profile->getParents()) {
+            $siblingsPromise = $isiteService
+                ->setGroupChildrenOn($profile->getParents(), self::MAX_LIST_DISPLAYED_ITEMS);
         }
 
-        /**
-         * @var IsiteResult[] $response
-         */
-        $response = $isiteService->setChildrenOn([$profile], $profile->getProjectSpace(), $this->getPage())->wait(true);
-        $profilesToFindChildrenFor = [];
+        if ($profile->isIndividual()) {
+            $this->resolvePromises(['siblings' => $siblingsPromise]);
+
+            return $this->renderWithChrome('profiles/individual.html.twig', [
+                'guid' => $guid,
+                'projectSpace' => $projectSpace,
+                'profile' => $profile,
+                'programme' => $parentProgramme,
+                'maxSiblings' => self::MAX_LIST_DISPLAYED_ITEMS,
+            ]);
+        }
+
+        // Get the children of the current profile synchronously, as we may need their children also
+        $isiteService
+            ->setChildrenOn([$profile], $profile->getProjectSpace(), $this->getPage())
+            ->wait(true);
+
+        // This will fetch the grandchildren of the current profile given the children fetched
+        // in the above query
+        $childProfilesThatAreGroups = [];
         foreach ($profile->getChildren() as $childProfile) {
             if ($childProfile->isGroup()) {
-                $profilesToFindChildrenFor[] = $childProfile;
+                $childProfilesThatAreGroups[] = $childProfile;
             }
         }
-        $profilesToFindChildrenFor = array_merge($profilesToFindChildrenFor, $profile->getParents());
-        $grandChildPromise = $isiteService->setChildrenOn($profilesToFindChildrenFor, $profile->getProjectSpace());
-        $this->resolvePromises([$grandChildPromise]);
-        $paginator = $this->getPaginator(reset($response));
-        return $this->renderWithChrome('profiles/group.html.twig', ['profile' => $profile, 'paginatorPresenter' => $paginator, 'programme' => $context]);
+        $grandChildrenPromise = $isiteService->setChildrenOn($childProfilesThatAreGroups, $profile->getProjectSpace());
+        $this->resolvePromises([$grandChildrenPromise, $siblingsPromise]);
+        $paginator = $this->getPaginator($profile);
+
+        return $this->renderWithChrome('profiles/group.html.twig', [
+            'guid' => $guid,
+            'projectSpace' => $projectSpace,
+            'profile' => $profile,
+            'paginatorPresenter' => $paginator,
+            'programme' => $parentProgramme,
+            'maxSiblings' => self::MAX_LIST_DISPLAYED_ITEMS,
+        ]);
     }
 
     private function redirectWith(string $key, string $slug, bool $preview)
@@ -93,12 +135,16 @@ class ShowController extends BaseController
         return $this->cachedRedirectToRoute('programme_profile', $params, 301);
     }
 
-    private function getPaginator(IsiteResult $iSiteResult): ?PaginatorPresenter
+    private function getPaginator(Profile $profile): ?PaginatorPresenter
     {
-        if ($iSiteResult->getTotal() <= 48) {
+        if ($profile->getChildCount() <= self::MAX_LIST_DISPLAYED_ITEMS) {
             return null;
         }
 
-        return new PaginatorPresenter($this->getPage(), 48, $iSiteResult->getTotal());
+        return new PaginatorPresenter(
+            $this->getPage(),
+            self::MAX_LIST_DISPLAYED_ITEMS,
+            $profile->getChildCount()
+        );
     }
 }

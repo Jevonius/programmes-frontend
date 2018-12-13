@@ -4,6 +4,7 @@ namespace App\Builders;
 use App\ExternalApi\Isite\Domain\Profile;
 use BBC\ProgrammesPagesService\Domain\ValueObject\Pid;
 use Faker\Factory;
+use Psr\Log\NullLogger;
 
 class ProfileBuilder extends AbstractBuilder
 {
@@ -13,6 +14,7 @@ class ProfileBuilder extends AbstractBuilder
         $this->classTarget = Profile::class;
 
         $this->blueprintConstructorTarget = [
+            'logger' => new NullLogger(),
             'title' => $faker->sentence(3),
             'key' => $faker->word,
             'fileId' => $faker->word,
@@ -29,6 +31,7 @@ class ProfileBuilder extends AbstractBuilder
             'onwardJourneyBlock' => null,
             'tagline' => "This brand new sofa is only £399! (Other sofas are available)",
             'parents' => [],
+            'bbc_site' => null,
         ];
     }
 

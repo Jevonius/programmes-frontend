@@ -5,6 +5,7 @@ namespace App\Controller;
 
 use App\Branding\BrandingPlaceholderResolver;
 use App\Cosmos\Dials;
+use App\Ds2013\PresenterFactory;
 use App\Translate\TranslateProvider;
 use App\ValueObject\AnalyticsCounterName;
 use App\ValueObject\AtiAnalyticsLabels;
@@ -80,6 +81,7 @@ abstract class BaseController extends AbstractController
             TranslateProvider::class,
             CosmosInfo::class,
             Dials::class,
+            PresenterFactory::class,
         ]);
     }
 
@@ -225,8 +227,7 @@ abstract class BaseController extends AbstractController
             $atiAnalyticsLabelsValues = new AtiAnalyticsLabels($this->context, $this->istatsProgsPageType, $cosmosInfo->getAppEnvironment(), $this->atistatsExtraLabels, $this->atiContentId);
             $atiAnalyticsLabelsValues = $atiAnalyticsLabelsValues->orbLabels();
         }
-        $analyticsCounterName = (string) new AnalyticsCounterName($this->context, $this->request()->getPathInfo());
-        $istatsAnalyticsLabelsInstance = new IstatsAnalyticsLabels($this->context, $this->istatsProgsPageType, $cosmosInfo->getAppVersion(), $this->istatsExtraLabels);
+        $istatsAnalyticsLabelsInstance = $this->createIstatsAnalyticsLabelsFromContext();
         $istatsAnalyticsLabelsValues = $istatsAnalyticsLabelsInstance->orbLabels();
 
         $orb = $this->container->get(OrbitClient::class)->getContent([
@@ -236,7 +237,7 @@ abstract class BaseController extends AbstractController
             'page' => $atiAnalyticsLabelsValues,
             'searchScope' => $this->orbitSearchScope,
             'skipLinkTarget' => 'programmes-content',
-            'analyticsCounterName' => $analyticsCounterName,
+            'analyticsCounterName' => (string) $this->createAnalyticsCounterNameFromContext(),
             'analyticsLabels' => $istatsAnalyticsLabelsValues,
         ]);
 
@@ -245,10 +246,8 @@ abstract class BaseController extends AbstractController
 
         $parameters = array_merge([
             'orb' => $orb,
-            'meta_context' => new MetaContext($this->context, $this->getCanonicalUrl(), $this->getMetaNoIndex(), $this->overridenDescription),
+            'meta_context' => $this->createMetaContextFromContext(),
             'comscore' => (new ComscoreAnalyticsLabels($this->context, $cosmosInfo, $istatsAnalyticsLabelsInstance, $this->getCanonicalUrl() . $urlQueryString))->getComscore(),
-            'analytics_counter_name' => $analyticsCounterName,
-            'istats_analytics_labels' => $istatsAnalyticsLabelsInstance->getLabels(),
             'branding' => $this->branding,
             'with_chrome' => true,
             'is_international' => $this->isInternational,
@@ -261,6 +260,26 @@ abstract class BaseController extends AbstractController
         $this->preRender();
         $parameters['with_chrome'] = false;
         return $this->render($view, $parameters, $this->response);
+    }
+
+    protected function createMetaContextFromContext(): MetaContext
+    {
+        return new MetaContext($this->context, $this->getCanonicalUrl(), $this->getMetaNoIndex(), $this->overridenDescription);
+    }
+
+    protected function createAnalyticsCounterNameFromContext(): AnalyticsCounterName
+    {
+        $analyticsCounterName = new AnalyticsCounterName($this->context, $this->request()->getPathInfo());
+        $this->container->get(PresenterFactory::class)->setAnalyticsCounterName($analyticsCounterName);
+        return $analyticsCounterName;
+    }
+
+    protected function createIstatsAnalyticsLabelsFromContext(): IstatsAnalyticsLabels
+    {
+        $cosmosInfo = $this->container->get(CosmosInfo::class);
+        $istatsAnalyticsLabels = new IstatsAnalyticsLabels($this->context, $this->istatsProgsPageType, $cosmosInfo->getAppVersion(), $this->istatsExtraLabels);
+        $this->container->get(PresenterFactory::class)->setIstatsAnalyticsLabels($istatsAnalyticsLabels);
+        return $istatsAnalyticsLabels;
     }
 
     /**
@@ -319,6 +338,8 @@ abstract class BaseController extends AbstractController
             $identifier = ':' . $identifier;
         }
         $this->atiContentId = 'urn:bbc:' . $authority . $identifier;
+      
+        $this->atistatsExtraLabels =  array_replace($this->atistatsExtraLabels, $labels);
     }
 
     protected function setIstatsProgsPageType(string $label): void

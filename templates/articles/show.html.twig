@@ -1,9 +1,11 @@
 {% extends 'base_ds2013.html.twig' %}
 
-{% block title %}{{ meta_context.titlePrefix() }} - {{ tr('features') }}{% endblock %}
+{% block title %}{{ meta_context.titlePrefix() ? meta_context.titlePrefix() ~ ' - ' : '' }}{{ article.getTitle() }}{% endblock %}
 {% block page_classes %}text-base{% endblock %}
+{% block project_space %}{{ projectSpace }}{% endblock %}
 
 {% block body %}
+    <!-- isite guid: {{ guid }} -->
     <div class="prog-layout">
         <div class="programmes-page">
             {% if article.getRowGroups() %}
@@ -21,7 +23,7 @@
 
                                     {% for block in row.getPrimaryBlocks() %}
                                         {% if block is not null %} {# Remove this line once all content block types are populated #}
-                                            {{ ds2013('contentBlock', block) }}
+                                            {{ ds2013('contentBlock', block, true, row.hasPrimaryBlocksOnly()) }}
                                         {% endif %}
                                     {% endfor %}
                                 {% endif %}

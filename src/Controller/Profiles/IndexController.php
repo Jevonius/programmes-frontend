@@ -14,6 +14,7 @@ class IndexController extends BaseController
 {
     public function __invoke(CoreEntity $coreEntity, ProfileService $isiteService)
     {
+        $this->setIstatsProgsPageType('profiles_list');
         $this->setContextAndPreloadBranding($coreEntity);
         $this->setAtiContentId((string) $coreEntity->getPid(), 'pips');
 

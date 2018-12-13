@@ -1,7 +1,7 @@
 {% set container_html_id = 'vote-telescope-' ~ random() %}
 
-<div class="component component--box component--box--striped component--box-flushbody component--box--secondary">
-    <div class="component component--box component--box--primary">
+<div class="component component--box component--box--primary">
+    <div class="component__body br-box-page">
         {% include 'shared/telescope/target_element.html.twig' with {
             container_html_id: container_html_id
         } %}

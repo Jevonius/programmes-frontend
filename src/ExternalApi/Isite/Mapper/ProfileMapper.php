@@ -3,7 +3,10 @@ declare(strict_types = 1);
 
 namespace App\ExternalApi\Isite\Mapper;
 
+use App\Controller\Helpers\IsiteKeyHelper;
 use App\ExternalApi\Isite\Domain\Profile;
+use InvalidArgumentException;
+use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 
 class ProfileMapper extends Mapper
@@ -12,11 +15,22 @@ class ProfileMapper extends Mapper
     {
         $form = $this->getForm($isiteObject);
         $formMetaData = $this->getFormMetaData($isiteObject);
+        $resultMetaData = $this->getMetaData($isiteObject);
         $projectSpace = $this->getProjectSpace($formMetaData);
-        $key = $this->isiteKeyHelper->convertGuidToKey($this->getString($this->getMetaData($isiteObject)->guid));
+        $guid = $this->getString($resultMetaData->guid);
+        $key = $this->isiteKeyHelper->convertGuidToKey($guid);
+        if (!$this->isProfile($resultMetaData)) {
+            throw new InvalidArgumentException(
+                sprintf(
+                    "iSite form with guid %s attempted to be mapped as profile, but is not a profile, is a %s",
+                    $guid,
+                    (string) $resultMetaData->type
+                )
+            );
+        }
         $title = $this->getString($formMetaData->title);
         $type = $this->getString($formMetaData->type);
-        $fileId = $this->getString($this->getMetaData($isiteObject)->fileId); // NOTE: This is the metadata fileId, not the form data file_id
+        $fileId = $this->getString($resultMetaData->fileId); // NOTE: This is the metadata fileId, not the form data file_id
         $image = $this->getString($formMetaData->image);
         // @codingStandardsIgnoreStart
         // Ignored PHPCS cause of snake variable fields included in the xml
@@ -26,11 +40,13 @@ class ProfileMapper extends Mapper
         $brandingId = $this->getString($formMetaData->branding_id);
         $imagePortrait = $this->getString($form->profile->image_portrait);
         $tagline = $this->getString($formMetaData->tagline);
+        $bbcSite = $this->getString($formMetaData->bbc_site) ?: null;
         $groupSize = null;
 
-        if(!empty($this->getString($formMetaData->group_size)) || $this->getString($formMetaData->group_size) === '0'){
-            $groupSize = (int) $this->getString($formMetaData->group_size);
+        if (!empty($this->getString($formMetaData->group_size)) || ($this->getString($formMetaData->group_size) === '0')) {
+            $groupSize = (int)$this->getString($formMetaData->group_size);
         }
+        
 
         $keyFacts = [];
         if (!empty($form->key_facts)) {
@@ -44,29 +60,19 @@ class ProfileMapper extends Mapper
         if (!empty($formMetaData->parents->parent->result)) {
             foreach ($formMetaData->parents as $parent) {
                 if ($this->isPublished($parent->parent)) {
-                    $parents[] = $this->mapperFactory->createProfileMapper()->getDomainModel($parent->parent->result);
+                    if ($this->isProfile($this->getMetaData($parent->parent->result))) {
+                        /**
+                         * iSite does not prevent you from adding other things than profiles (e.g. articles)
+                         * as parents of your article. Because of course it doesn't.
+                         * This filters those out
+                         */
+                        $parents[] = $this->mapperFactory->createProfileMapper()->getDomainModel($parent->parent->result);
+                    }
                 }
             }
         }
 
-        $contentBlocks = [];
-        //check if module is in the data
-        if (!empty($form->profile->content_blocks)) {
-            $blocks = $form->profile->content_blocks;
-            if (empty($blocks[0]->content_block->result)) {
-                $contentBlocks = null; // Content blocks have not been fetched
-            } else {
-                $contentBlocksList = [];
-                foreach ($blocks as $block) {
-                    if ($this->isPublished($block->content_block)) { // Must be published
-                        $contentBlocksList[] = $block->content_block;
-                    }
-                }
-                $contentBlocks = $this->getDomainModels(
-                    $contentBlocksList
-                );
-            }
-        }
+        $contentBlocks = $this->getContentBlocks($form);
 
         $onwardJourneyBlock = null;
         if (!empty($form->profile->onward_journeys)) {
@@ -78,7 +84,27 @@ class ProfileMapper extends Mapper
         }
         // @codingStandardsIgnoreEnd
 
-        return new Profile($title, $key, $fileId, $type, $projectSpace, $parentPid, $shortSynopsis, $longSynopsis, $brandingId, $contentBlocks, $keyFacts, $image, $imagePortrait, $onwardJourneyBlock, $tagline, $parents, $groupSize);
+        return new Profile(
+            $this->logger,
+            $title,
+            $key,
+            $fileId,
+            $type,
+            $projectSpace,
+            $parentPid,
+            $shortSynopsis,
+            $longSynopsis,
+            $brandingId,
+            $contentBlocks,
+            $keyFacts,
+            $image,
+            $imagePortrait,
+            $onwardJourneyBlock,
+            $tagline,
+            $parents,
+            $bbcSite,
+            $groupSize
+        );
     }
 
     public function getDomainModels($contentBlocksList): array
@@ -90,5 +116,54 @@ class ProfileMapper extends Mapper
             $blocks[] = $contentBlocksMapper->getDomainModel($block->result);
         }
         return $blocks;
+    }
+
+    private function isProfile(SimpleXMLElement $resultMetaData)
+    {
+        return (isset($resultMetaData->type) && ((string) $resultMetaData->type === 'programmes-profile'));
+    }
+
+    private function getContentBlocks(SimpleXMLElement $form): ?array
+    {
+        //check if module is in the data
+        // @codingStandardsIgnoreStart
+        if (!empty($form->profile->content_blocks)) {
+            $blocks = $form->profile->content_blocks;
+            $countBlocks = count($blocks);
+            $countBlocksUnfetchedOrDeleted = 0;
+            foreach ($blocks as $block) {
+                if (isset($block->content_block) && (string) $block->content_block && strlen((string) $block->content_block)) {
+                    /**
+                     * Content blocks that have not been fetched look like:
+                     * <content_block>urn:isite:progs-drama:programmes-content-1539623978</content_block>
+                     * As do content blocks that have been deleted, annoyingly
+                     */
+                    $countBlocksUnfetchedOrDeleted++;
+                }
+            }
+            if ($countBlocksUnfetchedOrDeleted === $countBlocks) {
+                return null; // Content blocks have not been fetched
+            }
+
+            if (empty($blocks[0]->content_block->result)) {
+                /**
+                 * Content blocks that don't exist _can_ look like
+                 * <content_block/>
+                 * and the API needs to know the difference between "Not Fetched" and "Not existent"
+                 */
+                return []; // No content blocks
+            }
+            $contentBlocksList = [];
+            foreach ($blocks as $block) {
+                if ($this->isPublished($block->content_block)) { // Must be published
+                    $contentBlocksList[] = $block->content_block;
+                }
+            }
+            return $this->getDomainModels(
+                $contentBlocksList
+            );
+        }
+        // @codingStandardsIgnoreEnd
+        return [];
     }
 }

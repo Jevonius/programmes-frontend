@@ -21,12 +21,14 @@ class AtiAnalyticsLabels
     private $contentId;
 
     public function __construct($context, string $progsPageType, string $environment, array $extraLabels, string $contentId = null)
+
     {
         $this->context = $context;
         $this->pageType = $progsPageType;
         $this->appEnvironment = $environment;
         $this->extraLabels = $extraLabels;
         $this->contentId = $contentId;
+
     }
 
     public function orbLabels()
@@ -59,9 +61,9 @@ class AtiAnalyticsLabels
             $destination = 'ws_programmes';
         }
 
-        if (in_array($this->appEnvironment, ['int', 'stage', 'sandbox', 'test'])) {
+//        if (in_array($this->appEnvironment, ['int', 'stage', 'sandbox', 'test'])) {
             $destination .= '_test';
-        }
+//        }
 
         return $destination;
     }

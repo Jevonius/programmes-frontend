@@ -1,8 +1,21 @@
+{% extends "@Ds2013/Presenters/Domain/ContentBlock/content_block.html.twig" %}
+
 {% set loader_url = content_block.getBBCDownloadsUrl() ~ content_block.getBlock().getLoaderUrl() %}
 
-<div id="og-frame-holder"></div>
-<script>
-    require(["kite/embed"], function(embed) {
-        embed({{ loader_url|json_encode|raw }}, {{ content_block.getParams()|json_encode|raw }});
-    });
-</script>
+{% block extraClasses %}
+    {% if not content_block.isInPrimaryColumn() %}
+        component--box-flushbody
+    {% endif %}
+{% endblock %}
+
+{% block componentTitle %}{% endblock %}
+
+{% block blockContent %}
+
+    <div id="og-frame-holder"></div>
+    <script>
+        require(["kite/embed"], function(embed) {
+            embed({{ loader_url|json_encode|raw }}, {{ content_block.getParams()|json_encode|raw }});
+        });
+    </script>
+{% endblock %}

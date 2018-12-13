@@ -46,9 +46,6 @@ class Prose extends AbstractContentBlock
         ?Version $streamableVersion
     ) {
         parent::__construct($title);
-        if ($clip && !$streamableVersion) {
-            throw new InvalidArgumentException(sprintf('Clip %s must have a streamable version. None found', $clip->getPid()));
-        }
         $this->prose = $prose;
         $this->image = $image;
         $this->imageCaption = $imageCaption;
@@ -97,5 +94,10 @@ class Prose extends AbstractContentBlock
     public function getStreamableVersion(): ?Version
     {
         return $this->streamableVersion;
+    }
+
+    public function getType(): string
+    {
+        return 'prose';
     }
 }

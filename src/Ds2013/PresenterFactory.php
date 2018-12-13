@@ -9,8 +9,8 @@ use App\Ds2013\Presenters\Domain\ContentBlock\Clip\ClipStandalone\ClipStandalone
 use App\Ds2013\Presenters\Domain\ContentBlock\Clip\ClipStream\ClipStreamPresenter;
 use App\Ds2013\Presenters\Domain\ContentBlock\Faq\FaqPresenter;
 use App\Ds2013\Presenters\Domain\ContentBlock\Galleries\GalleriesPresenter;
-use App\Ds2013\Presenters\Domain\ContentBlock\InteractiveActivity\InteractiveActivityPresenter;
 use App\Ds2013\Presenters\Domain\ContentBlock\Image\ImagePresenter;
+use App\Ds2013\Presenters\Domain\ContentBlock\InteractiveActivity\InteractiveActivityPresenter;
 use App\Ds2013\Presenters\Domain\ContentBlock\Links\LinksPresenter;
 use App\Ds2013\Presenters\Domain\ContentBlock\Promotions\PromotionsPresenter;
 use App\Ds2013\Presenters\Domain\ContentBlock\Prose\ProsePresenter;
@@ -34,6 +34,7 @@ use App\Ds2013\Presenters\Section\Clip\Playout\ClipPlayoutPresenter;
 use App\Ds2013\Presenters\Section\Episode\Map\EpisodeMapPresenter;
 use App\Ds2013\Presenters\Section\EpisodesSubNav\EpisodesSubNavPresenter;
 use App\Ds2013\Presenters\Section\Footer\FooterPresenter;
+use App\Ds2013\Presenters\Section\GalleryDisplay\GalleryDisplayPresenter;
 use App\Ds2013\Presenters\Section\RelatedTopics\RelatedTopicsPresenter;
 use App\Ds2013\Presenters\Section\Segments\SegmentsListPresenter;
 use App\Ds2013\Presenters\Section\SupportingContent\SupportingContentPresenter;
@@ -52,8 +53,8 @@ use App\ExternalApi\Isite\Domain\ContentBlock\ClipBlock\ClipStandAlone;
 use App\ExternalApi\Isite\Domain\ContentBlock\ClipBlock\ClipStream;
 use App\ExternalApi\Isite\Domain\ContentBlock\Faq;
 use App\ExternalApi\Isite\Domain\ContentBlock\Galleries;
-use App\ExternalApi\Isite\Domain\ContentBlock\InteractiveActivity;
 use App\ExternalApi\Isite\Domain\ContentBlock\Image;
+use App\ExternalApi\Isite\Domain\ContentBlock\InteractiveActivity;
 use App\ExternalApi\Isite\Domain\ContentBlock\Links;
 use App\ExternalApi\Isite\Domain\ContentBlock\Promotions;
 use App\ExternalApi\Isite\Domain\ContentBlock\Prose;
@@ -65,13 +66,16 @@ use App\ExternalApi\Isite\Domain\ContentBlock\Touchcast;
 use App\ExternalApi\Isite\Domain\Profile;
 use App\ExternalApi\Recipes\Domain\Recipe;
 use App\Translate\TranslateProvider;
+use App\ValueObject\AnalyticsCounterName;
 use App\ValueObject\CosmosInfo;
+use App\ValueObject\IstatsAnalyticsLabels;
 use BBC\ProgrammesPagesService\Domain\Entity\Broadcast;
 use BBC\ProgrammesPagesService\Domain\Entity\Clip;
 use BBC\ProgrammesPagesService\Domain\Entity\CollapsedBroadcast;
 use BBC\ProgrammesPagesService\Domain\Entity\Contribution;
 use BBC\ProgrammesPagesService\Domain\Entity\CoreEntity;
 use BBC\ProgrammesPagesService\Domain\Entity\Episode;
+use BBC\ProgrammesPagesService\Domain\Entity\Gallery;
 use BBC\ProgrammesPagesService\Domain\Entity\Group;
 use BBC\ProgrammesPagesService\Domain\Entity\Podcast;
 use BBC\ProgrammesPagesService\Domain\Entity\Programme;
@@ -85,6 +89,8 @@ use Cake\Chronos\ChronosInterface;
 use Cake\Chronos\Date;
 use InvalidArgumentException;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use BBC\ProgrammesPagesService\Domain\Entity\Image as DomainImage;
+use App\DsShared\PresenterFactory as SharedPresenterFactory;
 
 /**
  * Ds2013 Factory Class for creating presenters.
@@ -119,12 +125,23 @@ class PresenterFactory
     /** @var CosmosInfo */
     private $cosmosInfo;
 
+    /** @var SharedPresenterFactory  */
+    private $presenterFactory;
+
+    /** @var AnalyticsCounterName */
+    private $analyticsCounterName;
+
+    /** @var IstatsAnalyticsLabels */
+    private $istatsAnalyticsLabels;
+
     public function __construct(
+        SharedPresenterFactory $presenterFactory,
         TranslateProvider $translateProvider,
         UrlGeneratorInterface $router,
         HelperFactory $helperFactory,
         CosmosInfo $cosmosInfo
     ) {
+        $this->presenterFactory = $presenterFactory;
         $this->translateProvider = $translateProvider;
         $this->router = $router;
         $this->helperFactory = $helperFactory;
@@ -142,26 +159,6 @@ class PresenterFactory
         return new CalendarPresenter(
             $date,
             $service,
-            $options
-        );
-    }
-
-    public function clipPlayoutPresenter(
-        Clip $clip,
-        ?Version $streamableVersion,
-        array $segmentEvents,
-        string $analyticsCounterName,
-        array $istatsAnalyticsLabels,
-        array $options = []
-    ) : ClipPlayoutPresenter {
-        return new ClipPlayoutPresenter(
-            $this,
-            $this->helperFactory->getStreamUrlHelper(),
-            $clip,
-            $streamableVersion,
-            $segmentEvents,
-            $analyticsCounterName,
-            $istatsAnalyticsLabels,
             $options
         );
     }
@@ -222,6 +219,16 @@ class PresenterFactory
         );
     }
 
+    public function galleryDisplayPresenter(
+        Gallery $gallery,
+        DomainImage $primaryImage,
+        array $images,
+        bool $fullImagePageView,
+        ?array $options
+    ) {
+        return new GalleryDisplayPresenter($this->presenterFactory, $gallery, $primaryImage, $images, $fullImagePageView, $this->router, $options);
+    }
+
     public function noSchedulePresenter(
         Service $service,
         ChronosInterface $start,
@@ -275,49 +282,50 @@ class PresenterFactory
     public function contentBlockPresenter(
         AbstractContentBlock $contentBlock,
         bool $inPrimaryColumn = true,
+        bool $isPrimaryColumnFullWith = false,
         array $options = []
     ): Presenter {
         if ($contentBlock instanceof Faq) {
-            return new FaqPresenter($contentBlock, $inPrimaryColumn, $options);
+            return new FaqPresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof Galleries) {
-            return new GalleriesPresenter($contentBlock, $inPrimaryColumn, $options);
+            return new GalleriesPresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof InteractiveActivity) {
-            return new InteractiveActivityPresenter($contentBlock, $inPrimaryColumn, $options);
+            return new InteractiveActivityPresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof Image) {
-            return new ImagePresenter($contentBlock, $inPrimaryColumn, $options);
+            return new ImagePresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof Links) {
-            return new LinksPresenter($contentBlock, $inPrimaryColumn, $options);
+            return new LinksPresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof Promotions) {
-            return new PromotionsPresenter($contentBlock, $inPrimaryColumn, $options);
+            return new PromotionsPresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof Prose) {
-            return new ProsePresenter($contentBlock, $inPrimaryColumn, $options);
+            return new ProsePresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof Quiz) {
-            return new QuizPresenter($contentBlock, $inPrimaryColumn, $options);
+            return new QuizPresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof Table) {
-            return new TablePresenter($contentBlock, $inPrimaryColumn, $options);
+            return new TablePresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof ClipStream) {
-            return new ClipStreamPresenter($contentBlock, $inPrimaryColumn, $options);
+            return new ClipStreamPresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof ClipStandalone) {
-            return new ClipStandalonePresenter($contentBlock, $inPrimaryColumn, $options);
+            return new ClipStandalonePresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof Telescope) {
-            return new TelescopePresenter($contentBlock, $inPrimaryColumn, $options);
+            return new TelescopePresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof ThirdParty) {
-            return new ThirdPartyPresenter($contentBlock, $inPrimaryColumn, $options);
+            return new ThirdPartyPresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
         if ($contentBlock instanceof Touchcast) {
-            return new TouchcastPresenter($contentBlock, $inPrimaryColumn, $options);
+            return new TouchcastPresenter($contentBlock, $inPrimaryColumn, $isPrimaryColumnFullWith, $options);
         }
 
         throw new InvalidArgumentException(sprintf(
@@ -398,21 +406,20 @@ class PresenterFactory
 
     public function smpPresenter(
         ProgrammeItem $programmeItem,
-        Version $streamableVersion,
+        ?Version $streamableVersion,
         array $segmentEvents,
-        ?string $analyticsCounterName,
-        ?array $analyticsLabels,
         array $options = []
     ): SmpPresenter {
         return new SmpPresenter(
             $programmeItem,
             $streamableVersion,
             $segmentEvents,
-            $analyticsCounterName,
-            $analyticsLabels,
+            $this->analyticsCounterName ? (string) $this->analyticsCounterName : null,
+            $this->istatsAnalyticsLabels ? $this->istatsAnalyticsLabels->getLabels() : null,
             $this->helperFactory->getSmpPlaylistHelper(),
             $this->router,
             $this->cosmosInfo,
+            $this->helperFactory->getStreamUrlHelper(),
             $options
         );
     }
@@ -564,5 +571,15 @@ class PresenterFactory
     public function relatedTopicsPresenter(array $relatedTopics, Programme $context, array $options = []): RelatedTopicsPresenter
     {
         return new RelatedTopicsPresenter($relatedTopics, $context, $options);
+    }
+
+    public function setAnalyticsCounterName(AnalyticsCounterName $analyticsCounterName): void
+    {
+        $this->analyticsCounterName = $analyticsCounterName;
+    }
+
+    public function setIstatsAnalyticsLabels(IstatsAnalyticsLabels $istatsAnalyticsLabels): void
+    {
+        $this->istatsAnalyticsLabels = $istatsAnalyticsLabels;
     }
 }

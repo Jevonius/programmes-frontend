@@ -51,6 +51,7 @@ class EpisodeController extends BaseController
         $this->setContextAndPreloadBranding($episode);
         $this->setInternationalStatusAndTimezoneFromContext($episode);
         $this->setAtiContentId((string) $episode->getPid(), 'pips');
+        $this->addAtiStatsExtraLabels(['contentType' => 'episode']);
 
         $linkedVersions = $versionsService->findLinkedVersionsForProgrammeItem($episode);
         $alternateVersions = [];

@@ -5,6 +5,7 @@ namespace App\ExternalApi\Isite\Mapper;
 
 use App\Controller\Helpers\IsiteKeyHelper;
 use App\ExternalApi\Exception\ParseException;
+use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
 
 /**
@@ -20,10 +21,14 @@ abstract class Mapper
     /** @var MapperFactory */
     protected $mapperFactory;
 
-    public function __construct(MapperFactory $mapperFactory, IsiteKeyHelper $isiteKeyHelper)
+    /** @var LoggerInterface */
+    protected $logger;
+
+    public function __construct(MapperFactory $mapperFactory, IsiteKeyHelper $isiteKeyHelper, LoggerInterface $logger)
     {
         $this->isiteKeyHelper = $isiteKeyHelper;
         $this->mapperFactory = $mapperFactory;
+        $this->logger = $logger;
     }
 
     abstract public function getDomainModel(SimpleXMLElement $isiteObject);

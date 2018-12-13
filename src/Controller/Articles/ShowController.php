@@ -9,6 +9,8 @@ use App\Ds2013\Presenters\Utilities\Paginator\PaginatorPresenter;
 use App\ExternalApi\Isite\Domain\Article;
 use App\ExternalApi\Isite\IsiteResult;
 use App\ExternalApi\Isite\Service\ArticleService;
+use BBC\ProgrammesPagesService\Domain\Entity\Group;
+use BBC\ProgrammesPagesService\Domain\Entity\Programme;
 use BBC\ProgrammesPagesService\Service\CoreEntitiesService;
 use App\Exception\HasContactFormException;
 use Symfony\Component\HttpFoundation\Request;
@@ -17,6 +19,7 @@ class ShowController extends BaseController
 {
     public function __invoke(string $key, string $slug, Request $request, ArticleService $isiteService, IsiteKeyHelper $isiteKeyHelper, CoreEntitiesService $coreEntitiesService)
     {
+        $this->setIstatsProgsPageType('article_show');
         $preview = false;
         if ($request->query->has('preview') && $request->query->get('preview')) {
             $preview = true;
@@ -33,6 +36,9 @@ class ShowController extends BaseController
             /** @var IsiteResult $isiteResult */
             $isiteResult = $isiteService->getByContentId($guid, $preview)->wait(true);
         } catch (HasContactFormException $e) {
+            if (!$slug) {
+                return $this->cachedRedirectToRoute('article_with_contact_form_noslug', ['key' => $key], 302, 3600);
+            }
             return $this->cachedRedirectToRoute('article_with_contact_form', ['key' => $key, 'slug' => $slug], 302, 3600);
         }
 
@@ -47,16 +53,23 @@ class ShowController extends BaseController
         if ($slug !== $article->getSlug()) {
             return $this->redirectWith($article->getKey(), $article->getSlug(), $preview);
         }
-
+        if ($article->getBbcSite()) {
+            $this->setIstatsExtraLabels(['bbc_site' => $article->getBbcSite()]);
+        }
         $context = null;
+        $parentProgramme = null;
+        $projectSpace = $article->getProjectSpace();
         if (!empty($article->getParentPid())) {
             $context = $coreEntitiesService->findByPidFull($article->getParentPid());
-
-            if ($article->getProjectSpace() !== $context->getOption('project_space')) {
+            if ($context instanceof Group) {
+                $parentProgramme = $context->getParent();
+            } else {
+                $parentProgramme = $context;
+            }
+            if ($context && ($article->getProjectSpace() !== $context->getOption('project_space'))) {
                 throw $this->createNotFoundException('Project space Article-Programme not matching');
             }
         }
-
         $this->setContext($context);
         $this->setAtiContentId($guid, 'isite2');
 
@@ -74,9 +87,11 @@ class ShowController extends BaseController
         return $this->renderWithChrome(
             'articles/show.html.twig',
             [
+                'guid' => $guid,
+                'projectSpace' => $projectSpace,
                 'article' => $article,
                 'paginatorPresenter' => $paginator,
-                'programme' => $context,
+                'programme' => $parentProgramme,
             ]
         );
     }

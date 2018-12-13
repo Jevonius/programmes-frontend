@@ -5,11 +5,17 @@
 {% endif %}
 
 <div
-    class="component component--box {{ container_classes }} {% block extraClasses %}{% endblock %}">
-    {% block title %}
-        {% if content_block.getBlock().getTitle() %}
+    class="component component--box {{ container_classes }} {% block extraClasses %}{% endblock %}" data-content-block-type="{{ content_block.getBlock().getType() }}">
+    {% block componentTitle %}
+        {% if content_block.getBlock().getTitle() or block('defaultTitle') is not empty %}
             <div class="component__header {{ content_block.isInPrimaryColumn() ? 'br-box-page' : 'br-box-highlight'}}">
-                <h2>{{ content_block.getBlock().getTitle() }}</h2>
+                <h2>
+                    {% if content_block.getBlock().getTitle() %}
+                        {{ content_block.getBlock().getTitle() }}
+                    {% else %}
+                        {% block defaultTitle %}{% endblock %}
+                    {% endif %}
+                </h2>
             </div>
         {% endif %}
     {% endblock %}

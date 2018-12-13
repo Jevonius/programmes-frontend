@@ -22,7 +22,7 @@
         {% do dns_prefetch('https://fig.bbc.co.uk') %}
 
         <script>document.documentElement.className += ' has-js';</script>
-        <!-- iSite2 Project (Tenant space): {{ meta_context.getProjectSpace() }} -->
+        <!-- iSite2 Project (Tenant space): {% block project_space %}{{ meta_context.getProjectSpace() }}{% endblock %} -->
         {#
             bbcdotcom adverts requires synchronous fig loading.
             See https://navigation.api.bbc.co.uk/docs/fig.md#using-a-blocking-fig
@@ -43,6 +43,7 @@
                     'timezone-notification': "{{ asset_js('js/timezone-notification.js') }}",
                     'comscorews': "{{ asset_js('js/comscorews.js') }}",
                     'episode-guide': "{{ asset_js('js/episode-guide.js') }}",
+                    'gallery': "{{ asset_js('js/gallery.js') }}",
                     'picturefill': "{{ asset_js('js/picturefill.js') }}",
                     'popup': "{{ asset_js('js/popup.js') }}",
                     'snippets': "{{ asset_js("js/snippets.js") }}",

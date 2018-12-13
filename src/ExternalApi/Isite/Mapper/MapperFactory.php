@@ -86,7 +86,7 @@ class MapperFactory
     private function findMapper(string $mapperType)
     {
         if (!isset($this->instances[$mapperType])) {
-            $this->instances[$mapperType] = new $mapperType($this, $this->isiteKeyHelper);
+            $this->instances[$mapperType] = new $mapperType($this, $this->isiteKeyHelper, $this->logger);
         }
         return $this->instances[$mapperType];
     }

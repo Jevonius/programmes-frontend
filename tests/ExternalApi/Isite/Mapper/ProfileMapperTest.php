@@ -39,7 +39,8 @@ class ProfileMapperTest extends TestCase
                 $vs,
                 $logger
             ),
-            $keyHelper
+            $keyHelper,
+            $logger
         );
     }
 
