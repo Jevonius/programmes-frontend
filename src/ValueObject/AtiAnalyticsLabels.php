@@ -20,15 +20,13 @@ class AtiAnalyticsLabels
     /** @var string */
     private $contentId;
 
-    public function __construct($context, string $progsPageType, string $environment, array $extraLabels, string $contentId = null)
-
+    public function __construct($context, string $progsPageType, string $environment, array $extraLabels, string $contentId = null
     {
         $this->context = $context;
         $this->pageType = $progsPageType;
         $this->appEnvironment = $environment;
         $this->extraLabels = $extraLabels;
         $this->contentId = $contentId;
-
     }
 
     public function orbLabels()
