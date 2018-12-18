@@ -38,6 +38,7 @@ define(['jquery-1.9', 'cookieStore'], function($, DataStore) {
             var wrap = $('<div class="third-party__embed"></div>');
             wrap.html(code);
             this.container.addClass('third-party--' + provider.name).html(wrap);
+            this.container.attr('content-block-type', provider.name).html(wrap);
         },
         start : function() {
             var matched_provider = this.getOEmbedProvider(this.url);
