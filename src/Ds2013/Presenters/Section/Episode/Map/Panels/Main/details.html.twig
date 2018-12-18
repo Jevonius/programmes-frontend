@@ -8,11 +8,11 @@
             <h1 class="no-margin">{{ details.getEpisode().getTitle() }}</h1>
             <div class="gamma">
                 <div class="{% if not details.getEpisode().getParent().isTleo() %}offset{% endif %}">
-                    {{- ds_shared(
+                    {{ ds_shared(
                         'entityContext',
                         details.getEpisode(),
                         { 'include_self': false, 'is_tabbable': true }
-                    ) -}}
+                    ) }}
                 </div>
                 {% if details.getEpisode().getPosition() and details.getEpisode().getParent().getExpectedChildCount() %}
                     <span>
