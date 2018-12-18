@@ -1,5 +1,10 @@
 {%- for item in entity_context.getAncestry() -%}
-    <a tabindex="-1" class="context__item" href="{{ path('find_by_pid', {'pid': item.getPid()}) }}">{{ item.getTitle() }}</a>
+    <a
+        {{ not entity_context.getOption('is_tabbable') ? 'tabindex="-1"' }}
+        class="context__item"
+        href="{{ path('find_by_pid', {'pid': item.getPid()}) }}"
+    >
+       {{- item.getTitle() -}}
+    </a>
     {{- not loop.last ? (loop.first ? ' ' : ', ') -}}
 {%- endfor -%}
-{#- I am a comment with whitespace supression so a newline is not rendered at the end of this template -#}
