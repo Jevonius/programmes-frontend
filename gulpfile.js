@@ -144,21 +144,25 @@ gulp.task('watch',function() {
     gulp.watch(
         [staticPathSrc + sassMatch, 'src/**/*.scss'],
     ).on('change', function() {
-        gulp.series('watch');
+        let series = gulp.series('watch');
+        series();
     });
 
     gulp.watch([staticPathSrc + imageMatch]).on('change', function() {
-        gulp.series('images');
+        let series = gulp.series('images');
+        series();
     });
 
     gulp.watch(staticPathSrc + jsMatch).on('change', function() {
-        gulp.series('js');
+        let series = gulp.series('js');
+        series();
     });
 });
 
 gulp.task('default', function(cb){
     isSandbox = true;
-    gulp.series('sass', 'images', 'js');
+    let series = gulp.series('sass', 'images', 'js');
+    series();
     cb(); // This tells gulp the taks is finished
 });
 gulp.task('distribution', gulp.series('rev'));
