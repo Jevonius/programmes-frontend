@@ -112,10 +112,6 @@
         padding: $spacing;
         border-style: none;
     }
-
-    .highlight-box--list:last-child  {
-        border-style: none;
-    }
 }
 
 @include highlight-box-setup();

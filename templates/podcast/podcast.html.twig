@@ -81,6 +81,7 @@
                         <div class="component__header br-box-page">
                             <h2>{{ tr('podcasts_desc') }}</h2>
                         </div>
+                        <ul class="list-unstyled">
                         {% for downloadableVersion in downloadableVersions %}
                             {% if loop.first %}
                                 {% set imageClasses ='programme__img--nomax 1/4@bpb1 1/4@bpb2 1/2@bpw' %}
@@ -88,6 +89,7 @@
                             {% else %}
                                 {% set imageClasses='1/4@bpb1 1/4@bpb2-one-quarter 1/3@bpw' %}
                             {% endif %}
+                            <li class="">
                                 {{ ds2013('programme', downloadableVersion.programmeItem,{
 
                                         'highlight_box_classes': 'highlight-box--list',
@@ -107,8 +109,9 @@
                                             },
 
                                     }) }}
-
+                            </li>
                         {% endfor %}
+                    </ul>
                     </div>
                     {%- if paginatorPresenter -%}
                         {{ ds2013_presenter(paginatorPresenter) }}
