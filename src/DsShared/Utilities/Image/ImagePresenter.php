@@ -92,9 +92,6 @@ class ImagePresenter extends Presenter
         // 320xn is not. Which makes sense as images without an explicit
         // height do not get forced to a particular ratio at all.
 
-//        if(!$this->hasImage()){
-//            return $this-
-//        }
         $ratio = $this->getOption('ratio');
         if ($ratio && $ratio !== 'auto') {
             $height = (string) round($width / $ratio, 0);
