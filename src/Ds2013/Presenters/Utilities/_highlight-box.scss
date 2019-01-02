@@ -61,6 +61,7 @@
         border-width: 1px;
         border-bottom-style: solid;
 
+
         // OK WTF is this doing, well gather around children...
         // The last list item should not have a border along its bottom.
         // The easiest way to do this is to toggle the border-color, otherwise
@@ -83,6 +84,7 @@
                 border-bottom-color: transparent;
             }
         }
+
 
         &:hover,
         &:active,
@@ -110,6 +112,10 @@
     .highlight-box--list-borderless#{$suffix} {
         margin: 0;
         padding: $spacing;
+        border-style: none;
+    }
+
+    .highlight-box--list:last-child  {
         border-style: none;
     }
 }
@@ -151,6 +157,7 @@
     .highlight-box--list-borderless {
         padding: $wide-spacing;
     }
+
 }
 
 @each $name in $gel-widths-breakpoints {
