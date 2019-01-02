@@ -36,7 +36,7 @@ class ProfileServiceTest extends TestCase
         $mockHttpApiClientFactory->expects($this->once())
             ->method('getHttpApiMultiClient')
             ->with('cacheKey', [$url], function () {
-            }, [], $this->isInstanceOf(IsiteResult::class), CacheInterface::NORMAL, CacheInterface::NONE, ['timeout' => 10])
+            }, [], $this->isInstanceOf(IsiteResult::class), CacheInterface::NORMAL, CacheInterface::NONE, ['timeout' => 15, 'connect_timeout' => 10])
             ->willReturn($mockClient);
         $service = new ProfileService('baseurl', $mockHttpApiClientFactory, $this->createMock(IsiteFeedResponseHandler::class));
         $service->getByProgramme($mockProgramme);
@@ -67,7 +67,7 @@ class ProfileServiceTest extends TestCase
         $mockHttpApiClientFactory->expects($this->once())
             ->method('getHttpApiMultiClient')
             ->with('cacheKey', $urls, function () {
-            }, [[$profileA, $profileB, $profileC]], [], CacheInterface::NORMAL, CacheInterface::NONE, ['timeout' => 10])
+            }, [[$profileA, $profileB, $profileC]], [], CacheInterface::NORMAL, CacheInterface::NONE, ['timeout' => 15, 'connect_timeout' => 10])
             ->willReturn($mockClient);
         $service = new ProfileService('baseurl', $mockHttpApiClientFactory, $this->createMock(IsiteFeedResponseHandler::class));
         $service->setChildrenOn([$profileA, $profileB, $profileC], 'project-space');

@@ -10,7 +10,6 @@ use App\ExternalApi\Isite\Domain\Article;
 use App\ExternalApi\Isite\IsiteResult;
 use App\ExternalApi\Isite\Service\ArticleService;
 use BBC\ProgrammesPagesService\Domain\Entity\Group;
-use BBC\ProgrammesPagesService\Domain\Entity\Programme;
 use BBC\ProgrammesPagesService\Service\CoreEntitiesService;
 use App\Exception\HasContactFormException;
 use Symfony\Component\HttpFoundation\Request;
@@ -82,15 +81,13 @@ class ShowController extends BaseController
         $childPromise = $isiteService->setChildrenOn([$article], $article->getProjectSpace(), $this->getPage());
         $response = $this->resolvePromises(['children' => $childPromise, 'siblings' => $siblingPromise]);
 
-        $paginator = $this->getPaginator(reset($response['children']));
-
         return $this->renderWithChrome(
             'articles/show.html.twig',
             [
                 'guid' => $guid,
                 'projectSpace' => $projectSpace,
                 'article' => $article,
-                'paginatorPresenter' => $paginator,
+                'paginatorPresenter' => reset($response['children']) ? $this->getPaginator(reset($response['children'])) : null,
                 'programme' => $parentProgramme,
             ]
         );

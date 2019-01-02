@@ -62,7 +62,8 @@ class ProfileService extends IsiteService
             CacheInterface::NORMAL,
             CacheInterface::NONE,
             [
-                'timeout' => 10,
+                'connect_timeout' => 10, // Raised from 5s default to ward against PROGRAMMES-6816, re-examine after that
+                'timeout' => 15,
             ]
         );
 

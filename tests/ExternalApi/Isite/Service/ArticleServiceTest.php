@@ -41,7 +41,7 @@ class ArticleServiceTest extends TestCase
         $mockHttpApiClientFactory->expects($this->once())
             ->method('getHttpApiMultiClient')
             ->with('cacheKey', $urls, function () {
-            }, [[$articleA, $articleB, $articleC]], [], CacheInterface::NORMAL, CacheInterface::NONE, ['timeout' => 10])
+            }, [[$articleA, $articleB, $articleC]], [], CacheInterface::NORMAL, CacheInterface::NONE, ['timeout' => 15, 'connect_timeout' => 10])
             ->willReturn($mockClient);
         $service = new ArticleService('baseurl', $mockHttpApiClientFactory, $this->createMock(IsiteFeedResponseHandler::class));
         $service->setChildrenOn([$articleA, $articleB, $articleC], 'project-space');

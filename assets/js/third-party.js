@@ -74,7 +74,11 @@ define(['jquery-1.9', 'cookieStore'], function($, DataStore) {
             var dataStore = new DataStore();
             var policy = dataStore.readPolicy('personalisation'); //functional cookie
 
-            if (!policy || embedProvider.templateRegex) {
+            if (!policy) {
+                return;
+            }
+
+            if (embedProvider.templateRegex) {
                 return this.generateCodeFromTemplate(embedProvider, externalUrl);
             }
             return this.generateCodeFromRequest(embedProvider, externalUrl);

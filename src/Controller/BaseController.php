@@ -423,7 +423,8 @@ abstract class BaseController extends AbstractController
 
             $this->setBrandingId($this->fallbackBrandingId);
             $brandingClient = $this->container->get(BrandingClient::class);
-            return $brandingClient->getContent($this->brandingId, null);
+            $branding = $brandingClient->getContent($this->brandingId, null);
+            return $this->fulfilledBrandingPromise($branding);
         }
         if ($reason instanceof Exception) {
             throw $reason;

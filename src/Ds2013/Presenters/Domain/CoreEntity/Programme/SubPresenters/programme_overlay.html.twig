@@ -1,3 +1,5 @@
+{% import _self as self %}
+
 {% if programme_overlay.getOption('show_image') or programme_overlay.getOption('show_overlay') %}
     {% set outer_div_classes = build_css_classes({
         'programme__img' : true,
@@ -19,14 +21,32 @@
 
         {% block overlay %}
             {# This block is overriden (and called directly) from CollapsedBroadcastProgrammeOverlayPresenter #}
-            {% if programme_overlay.getOption('show_overlay') and not programme_overlay.isContainer() and programme_overlay.isAvailable() %}
-                {{ ds2013('cta',
-                    programme_overlay.getProgramme(),
-                    {
-                        'is_overlay': not programme_overlay.getOption('show_standalone_cta'),
-                        'data_link_track': programme_overlay.getOption('cta_link_location_track')
-                    }) }}
+            {% if programme_overlay.getOption('show_overlay') and not programme_overlay.isContainer() %}
+                {% if programme_overlay.isAvailable() %}
+                    {{ ds2013(
+                        'cta',
+                        programme_overlay.getProgramme(),
+                        {
+                            'is_overlay': not programme_overlay.getOption('show_standalone_cta'),
+                            'data_link_track': programme_overlay.getOption('cta_link_location_track')
+                        }
+                    ) }}
+                {% elseif programme_overlay.getOption('show_unavailable') %}
+                    {% if programme_overlay.hasFutureAvailability() %}
+                        {{ self.renderUnavailableMessage('clip_availability_future') }}
+                    {% else %}
+                        {{ self.renderUnavailableMessage('clip_availability_none') }}
+                    {% endif %}
+                {% endif %}
             {% endif %}
         {% endblock %}
     </div>
 {% endif %}
+
+{%  macro renderUnavailableMessage(unavailable_message) %}
+    <div class="playout__overlay">
+        <div class="playout__message">
+            <span class="delta">{{ tr(unavailable_message) }}</span>
+        </div>
+    </div>
+{% endmacro %}

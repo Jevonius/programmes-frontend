@@ -23,7 +23,7 @@
             {% endif %}
             {% if content_block.getBlock().getImage() is not empty %}
                 <div class="component">
-                        {{ ds_shared('image', content_block.getBlock().getImage(), 320, '') }}
+                        {{ ds_shared('image', content_block.getBlock().getImage(), 320, '', { 'ratio': 'auto' }) }}
                     {% if content_block.getBlock().getImageCaption() is not empty %}
                         <div class="centi island--squashed {% if content_block.isInPrimaryColumn() %}br-box-highlight{% else %}br-box-page{% endif %}">
                             {{ content_block.getBlock().getImageCaption() }}
