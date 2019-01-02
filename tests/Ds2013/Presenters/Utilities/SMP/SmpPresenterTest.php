@@ -17,11 +17,35 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class SmpPresenterTest extends TestCase
 {
+    /**
+     * This test has to be the first one in this TestCase class.
+     * We are testing the value of a static property whose value is
+     * increased by one on each class instantiation. Starting from 1.
+     * If this test method isn't the first. Then there's a X number
+     * of class instantiation ran in other methods and we can't predict
+     * the initial/final value.
+     *
+     * @dataProvider getSmpConfigIncreasesPlayoutIdOnSubsequentCallsDataProvider
+     */
+    public function testGetSmpConfigIncreasesPlayoutIdOnSubsequentCalls($expectedPlayoutId)
+    {
+        $smpConfig = $this->presenter()->getSmpConfig();
+        $this->assertEquals($expectedPlayoutId, $smpConfig['container']);
+    }
+
+    public function getSmpConfigIncreasesPlayoutIdOnSubsequentCallsDataProvider(): array
+    {
+        return [
+            ['#playout-st0000011'],
+            ['#playout-st0000012'],
+            ['#playout-st0000013'],
+        ];
+    }
+
     public function testGetSmpConfig()
     {
         $smpConfig = $this->presenter()->getSmpConfig();
 
-        $this->assertEquals('#playout-st000001', $smpConfig['container']);
         $this->assertEquals('st000001', $smpConfig['pid']);
     }
 
@@ -67,9 +91,15 @@ class SmpPresenterTest extends TestCase
         ]);
 
         if ($useClip) {
-            $programme = ClipBuilder::any()->with(['pid' => new Pid('st000001'), 'mediaType' => $mediaType])->build();
+            $programme = ClipBuilder::any()->with([
+                'pid' => new Pid('st000001'),
+                'mediaType' => $mediaType,
+            ])->build();
         } else {
-            $programme = EpisodeBuilder::any()->with(['pid' => new Pid('st000001'), 'mediaType' => $mediaType])->build();
+            $programme = EpisodeBuilder::any()->with([
+                'pid' => new Pid('st000001'),
+                'mediaType' => $mediaType,
+            ])->build();
         }
 
         $options = [];
