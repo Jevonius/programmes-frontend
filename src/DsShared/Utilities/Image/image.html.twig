@@ -1,5 +1,13 @@
+{% if image.hasImage() %}
+    {% set Srcsets = image.getSrcsets() %}
+{% else %}
+    {% set Srcsets = asset('images/blank.png') %}
+{% endif %}
+
 {%- if image.getOption('is_lazy_loaded') -%}
-    <img class="image lazyload {{ image.getOption('image_classes') }}" data-src="{{ image.getSrc() }}" data-srcset="{{ image.getSrcsets() }}" data-sizes="auto" alt="{{ image.getOption('alt') }}">
+    <img class="image lazyload {{ image.getOption('image_classes') }}" data-src="{{ image.getSrc() }}" data-srcset="{{ Srcsets }}" data-sizes="auto" alt="{{ image.getOption('alt') }}">
 {%- else -%}
     <img class="image {{ image.getOption('image_classes') }}" src="{{ image.getSrc() }}" srcset="{{ image.getSrcsets() }}" sizes="{{ image.getSizes() }}" alt="{{ image.getOption('alt') }}">
 {%- endif -%}
+
+{{ dump(image) }}
