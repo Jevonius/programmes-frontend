@@ -9,6 +9,7 @@
 
 .pagination {
     margin-bottom: $basic-spacing;
+    margin-top: $basic-spacing;
 
     // Nested in a .pagination class to trump the "nav > li" styles
     .pagination__page,
