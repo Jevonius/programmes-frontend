@@ -9,5 +9,3 @@
 {%- else -%}
     <img class="image {{ image.getOption('image_classes') }}" src="{{ image.getSrc() }}" srcset="{{ image.getSrcsets() }}" sizes="{{ image.getSizes() }}" alt="{{ image.getOption('alt') }}">
 {%- endif -%}
-
-{{ dump(image) }}
