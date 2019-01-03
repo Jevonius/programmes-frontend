@@ -20,11 +20,11 @@ class AtiAnalyticsLabels
     /** @var string */
     private $contentId;
 
-    public function __construct($context, string $progsPageType, string $environment, array $extraLabels, string $contentId = null
+    public function __construct($context, string $progsPageType, CosmosInfo $cosmosInfo, array $extraLabels, string $contentId = null
     {
         $this->context = $context;
         $this->pageType = $progsPageType;
-        $this->appEnvironment = $environment;
+        $this->appEnvironment = $cosmosInfo->getAppEnvironment();
         $this->extraLabels = $extraLabels;
         $this->contentId = $contentId;
     }

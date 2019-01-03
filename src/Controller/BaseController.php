@@ -55,7 +55,7 @@ abstract class BaseController extends AbstractController
 
     private $atistatsExtraLabels = [];
 
-    private $atiContentId;
+    private $atiContentId = "bbc:urn:pips";
 
     private $istatsProgsPageType;
 
@@ -224,7 +224,7 @@ abstract class BaseController extends AbstractController
         $cosmosInfo = $this->container->get(CosmosInfo::class);
         $atiAnalyticsLabelsValues = null;
         if ($this->container->get(Dials::class)->get('ati-stats') === 'true') {
-            $atiAnalyticsLabelsValues = new AtiAnalyticsLabels($this->context, $this->istatsProgsPageType, $cosmosInfo->getAppEnvironment(), $this->atistatsExtraLabels, $this->atiContentId);
+            $atiAnalyticsLabelsValues = new AtiAnalyticsLabels($this->context, $this->istatsProgsPageType, $cosmosInfo, $this->atistatsExtraLabels, $this->atiContentId);
             $atiAnalyticsLabelsValues = $atiAnalyticsLabelsValues->orbLabels();
         }
         $istatsAnalyticsLabelsInstance = $this->createIstatsAnalyticsLabelsFromContext();
