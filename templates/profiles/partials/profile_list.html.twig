@@ -1,4 +1,4 @@
-v{%  if profiles|length <= 0 %}
+{% if profiles|length <= 0 %}
     <p class="note">{{ tr('profiles_none', {'%1': "<a href='" ~ path('find_by_pid', {'pid': programme.pid}) ~ "' class='br-blocklink__link'>" ~ programme.getTitle() ~ "</a>"})|raw }}</p>
 {% else %}
     <ul class="grid-wrapper highlight-box-wrapper highlight-box-wrapper--grid">
