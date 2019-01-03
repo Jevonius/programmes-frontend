@@ -338,8 +338,6 @@ abstract class BaseController extends AbstractController
             $identifier = ':' . $identifier;
         }
         $this->atiContentId = 'urn:bbc:' . $authority . $identifier;
-      
-        $this->atistatsExtraLabels =  array_replace($this->atistatsExtraLabels, $labels);
     }
 
     protected function setIstatsProgsPageType(string $label): void

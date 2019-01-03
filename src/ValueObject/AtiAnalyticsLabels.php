@@ -20,7 +20,7 @@ class AtiAnalyticsLabels
     /** @var string */
     private $contentId;
 
-    public function __construct($context, string $progsPageType, CosmosInfo $cosmosInfo, array $extraLabels, string $contentId = null
+    public function __construct($context, string $progsPageType, CosmosInfo $cosmosInfo, array $extraLabels, string $contentId = null)
     {
         $this->context = $context;
         $this->pageType = $progsPageType;

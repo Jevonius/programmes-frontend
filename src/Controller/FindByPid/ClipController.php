@@ -48,7 +48,7 @@ class ClipController extends BaseController
         $this->setIstatsReleaseDate($clip);
         $this->setIstatsReleaseYear($clip);
         $this->setParentIstats($clip);
-        $this->setContextAndPreloadBranding($clip)
+        $this->setContextAndPreloadBranding($clip);
         $this->setAtiContentId((string) $clip->getPid(), 'pips');
         $this->addAtiStatsExtraLabels(['contentType' => 'player-clip']);
 
