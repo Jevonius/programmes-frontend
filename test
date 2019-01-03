@@ -8045,4 +8045,16 @@ Time: 6.12 secs; Memory: 24Mb
 bash: prompt_git: command not found
 ]0;programmes-frontend[1m
 [38;5;166mfranct04[97m at [38;5;136mmc-n351903[97m in [38;5;64m~/programmes-cloud-sandbox/workspace/programmes-frontend
-[97m🤨🤨🤨🤨  (B[mscript/test[C[C[C[C[C[Ccomposer install[C[C[C[C[C[C[5Pscript/test[C[C[C[C[C[C[1Pgit status
+[97m🤨🤨🤨🤨  (B[mscript/test[C[C[C[C[C[Ccomposer install[C[C[C[C[C[C[5Pscript/test[C[C[C[C[C[C[1Pgit statuscheckout -b 'Programmes-6832'n[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[13Pdevelop[C[C[C[C[C[C    git push --set-upstream origin Programmes-6831[C[C[C[C[C[Cgit push[K[C[C[C[C[C[C'[Kgit commit -m 'removed empty div when no caption exists"[C[C[C[C[C[C[C[C[C[Cadd .[K
+bash: prompt_git: command not found
+]0;programmes-frontend[1m
+[38;5;166mfranct04[97m at [38;5;136mmc-n351903[97m in [38;5;64m~/programmes-cloud-sandbox/workspace/programmes-frontend
+[97m🤨🤨🤨🤨  (B[mgit add .[C[C[C[C[C[Cscript/test[C[C[C[C[C[Ccomposer install[C[C[C[C[C[C[5Pscript/test[C[C[C[C[C[C[1Pgit statuscheckout -b 'Programmes-6832'n[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[C[13Pdevelop[C[C[C[C[C[C    git push --set-upstream origin Programmes-6831[C[C[C[C[C[Cgit push[K[C[C[C[C[C[C'[Kgit commit -m 'removed empty div when no caption exists"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"[1P"f"i"x"e"d" "t"e"s"t"s"
+[38;5;136m→ (B[m'
+[refactor-context 28303915] fixed tests"
+ 4 files changed, 8050 insertions(+), 4 deletions(-)
+ create mode 100644 test
+bash: prompt_git: command not found
+]0;programmes-frontend[1m
+[38;5;166mfranct04[97m at [38;5;136mmc-n351903[97m in [38;5;64m~/programmes-cloud-sandbox/workspace/programmes-frontend
+[97m🤨🤨🤨🤨  (B[mgit pushcd[K[K[K[K[K[K[K[K[K[Kcd p[K[K[K[Kcd .
