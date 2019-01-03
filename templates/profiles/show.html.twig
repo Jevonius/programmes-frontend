@@ -38,7 +38,9 @@
                             {% endif %}
                             {% set siblingCount = parent.getChildCount() %}
                             {% if siblingCount > maxSiblings %}
-                                <a href="{{ path('programme_profile', {'key': parent.getKey(), 'slug': parent.getSlug()}) }}" >See all from {{ parent.getTitle() }} ({{ siblingCount }})</a>
+                                <div class="component__header">
+                                    <a href="{{ path('programme_profile', {'key': parent.getKey(), 'slug': parent.getSlug()}) }} ">See all from {{ parent.getTitle() }} ({{ siblingCount }})</a>
+                                </div>
                             {% endif %}
                         </div>
                     </div>
