@@ -37,16 +37,6 @@ define(function () {
             }
         };
 
-        this.readPolicy = function(policy) {
-            if (window.bbccookies !== undefined && window.bbccookies.cookiesEnabled()) {
-                return window.bbccookies.readPolicy(policy);
-            }
-
-            return false;
-        };
-
-        // private
-
         var findAll = function () {
             if (window.bbccookies === undefined || !window.bbccookies.cookiesEnabled()) {
                 return {};

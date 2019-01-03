@@ -38,6 +38,7 @@ gulp.task('js', ['js:clean'], function () {
         staticPathSrc + '/js/**/gallery.js',
         staticPathSrc + '/js/**/smp/*',
         staticPathSrc + '/js/snippet-player/**/snippets.js',
+        staticPathSrc + '/js/policy-service.js',
         staticPathSrc + '/js/third-party.js',
         'vendor/bbc-rmp/comscore/js-modules/comscorews.js',
         'node_modules/picturefill/dist/picturefill.js'
@@ -59,7 +60,7 @@ gulp.task('js', ['js:clean'], function () {
             'istats-1': 'empty:',
             'idcta/idcta-1': 'empty:',
             'uasclient': 'empty:',  // required by UasService
-            'relay-1': 'empty:' // required by UasClient
+            'relay-1': 'empty:', // required by UasClient
         },
         "optimize": 'uglify',
         "map": {
