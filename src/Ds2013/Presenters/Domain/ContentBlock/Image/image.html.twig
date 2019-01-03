@@ -1,6 +1,24 @@
 {% extends "@Ds2013/Presenters/Domain/ContentBlock/content_block.html.twig" %}
 
+{% if content_block.isInPrimaryColumn() %}
+    {% set caption_class = 'island--vertical' %}
+{% else %}
+    {% set caption_class = 'island--squashed' %}
+{% endif %}
+
+{%- block extraClasses -%}
+    {% if not content_block.isInPrimaryColumn() %}component--box-flushbody{% endif %}
+{%- endblock -%}
+
 {% block blockContent %}
-    {{ ds_shared('image', content_block.getBlock().getImageUrl(), 256, {0: 1, 770: 1/2, 1008: '490px'}, {'is_lazy_loaded': false}) }}
-    <div class="centi island--vertical">{{ content_block.getBlock().getCaption() }}</div>
+    {{- ds_shared(
+        'image',
+        content_block.getBlock().getImageUrl(),
+        256,
+        { 0: 1, 770: 1/2, 1008: '490px' },
+        { 'is_lazy_loaded': false, 'ratio': 'auto' }
+    ) -}}
+    {% if content_block.getBlock().getCaption() is not empty %}
+        <div class="centi {{ caption_class }}">{{ content_block.getBlock().getCaption() }}</div>
+    {% endif %}
 {% endblock %}

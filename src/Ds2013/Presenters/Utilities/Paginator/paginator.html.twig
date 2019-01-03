@@ -22,6 +22,10 @@
             <li class="pagination__spacer--hidden">
                 <span>&#8230;</span>
             </li>
+        {%- elseif item == 'spacer-mobile' -%}
+            <li class="pagination__spacer--hidden pagination__spacer--mobile">
+                <span>&#8230;</span>
+            </li>
         {%- else -%}
             {%- set classes = build_css_classes({
                 'pagination__page': true,
@@ -29,7 +33,8 @@
                 'pagination__page--nohide': (paginator.shouldApplyNoHideClass(item)),
                 'pagination__page--first': (item == 1),
                 'pagination__page--last': (item == paginator.getPageCount()),
-                'pagination__page--current': (item == paginator.getCurrentPage())
+                'pagination__page--current': (item == paginator.getCurrentPage()),
+                'pagination__page--mobile': (paginator.shouldApplyMobileClass(item))
             }) -%}
             {%- if item != paginator.getCurrentPage() -%}
                 <li class="{{ classes }}">

@@ -122,6 +122,10 @@
         margin-bottom: $wide-spacing;
     }
 
+    .highlight-box-wrapper--grid {
+        margin-bottom: -$wide-spacing !important;
+    }
+
     .highlight-box--grid {
         margin: 0 0 $wide-spacing;
 

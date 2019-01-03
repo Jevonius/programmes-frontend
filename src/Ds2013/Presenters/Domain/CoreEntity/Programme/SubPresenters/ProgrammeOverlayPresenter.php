@@ -35,6 +35,7 @@ class ProgrammeOverlayPresenter extends ProgrammePresenterBase
             1008 => '336px',
             1280 => '432px',
         ],
+        'show_unavailable' => false,
     ];
 
     public function __construct(

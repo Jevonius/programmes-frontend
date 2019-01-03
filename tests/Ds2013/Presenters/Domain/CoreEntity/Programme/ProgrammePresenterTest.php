@@ -188,6 +188,36 @@ class ProgrammePresenterTest extends TestCase
         );
     }
 
+    public function testHasFutureAvailability()
+    {
+        $programme = $this->createMock(Clip::class);
+        $programme->expects($this->once())
+            ->method('hasFutureAvailability')
+            ->willReturn(true);
+
+        $programmePresenter = new ProgrammePresenter(
+            $this->mockRouter,
+            $this->mockHelperFactory,
+            $programme
+        );
+        $this->assertTrue($programmePresenter->hasFutureAvailability());
+    }
+
+    public function testHasNotFutureAvailability()
+    {
+        $programme = $this->createMock(Clip::class);
+        $programme->expects($this->once())
+            ->method('hasFutureAvailability')
+            ->willReturn(false);
+
+        $programmePresenter = new ProgrammePresenter(
+            $this->mockRouter,
+            $this->mockHelperFactory,
+            $programme
+        );
+        $this->assertFalse($programmePresenter->hasFutureAvailability());
+    }
+
     public function testIsAvailable()
     {
         $programme = $this->createMock(Clip::class);

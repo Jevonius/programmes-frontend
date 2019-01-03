@@ -9,18 +9,16 @@
 {% block defaultTitle %}{{ tr('galleries', content_block.getBlock().getGalleries()|length) }}{% endblock %}
 
 {% block blockContent %}
-    <ul class="grid-wrapper highlight-box-wrapper bpb1-highlight-box-wrapper--grid bpw-highlight-box-wrapper--grid">
+    <ul class="grid-wrapper highlight-box-wrapper highlight-box-wrapper--grid@bpb1 highlight-box-wrapper--grid@bpw">
         {% for gallery in content_block.getBlock().getGalleries() %}
             <li class="grid{{ content_block.getBlock().getGalleries()|length > 1 ? ' 1/2@bpb1 1/2@bpw' : '' }}">
-                <div class="grid__inner">
-                    {{ ds2013('group', gallery, {
-                        'highlight_box_classes':'highlight-box--list highlight-box--grid@bpb1 programme--grid@bpb1 highlight-box--grid@bpw programme--grid@bpw',
-                        'show_synopsis':  false,
-                        'img_classes': '1/1@bpb1 1/1@bpw',
-                        'img_default_width': 240,
-                        'img_sizes': { 0: 1/2, 768: 1/4, 1008: '240px'}
-                    }) }}
-                </div>
+                {{ ds2013('group', gallery, {
+                    'highlight_box_classes':'highlight-box--list highlight-box--grid@bpb1 programme--grid@bpb1 highlight-box--grid@bpw programme--grid@bpw',
+                    'show_synopsis':  false,
+                    'img_classes': '1/1@bpb1 1/1@bpw',
+                    'img_default_width': 240,
+                    'img_sizes': { 0: 1/2, 768: 1/4, 1008: '240px'}
+                }) }}
             </li>
         {% endfor %}
     </ul>

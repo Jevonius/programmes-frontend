@@ -15,6 +15,8 @@ use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 
 class SmpPresenter extends Presenter
 {
+    private static $smpInstanceCounter = 0;
+
     protected $options = [
         'sizes' => [
             0 => 640,
@@ -53,6 +55,9 @@ class SmpPresenter extends Presenter
 
     private $streamableHelper;
 
+    /** @var string */
+    private $containerId;
+
     public function __construct(
         ProgrammeItem $programmeItem,
         ?Version $streamableVersion,
@@ -75,6 +80,8 @@ class SmpPresenter extends Presenter
         $this->router = $router;
         $this->cosmosInfo = $cosmosInfo;
         $this->streamableHelper = $streamableHelper;
+        self::$smpInstanceCounter++;
+        $this->containerId = 'playout-' . (string) $this->programmeItem->getPid() . self::$smpInstanceCounter;
     }
 
     public function getProgrammeItem(): ProgrammeItem
@@ -84,7 +91,7 @@ class SmpPresenter extends Presenter
 
     public function getContainerId()
     {
-        return 'playout-' . (string) $this->programmeItem->getPid();
+        return $this->containerId;
     }
 
     /**

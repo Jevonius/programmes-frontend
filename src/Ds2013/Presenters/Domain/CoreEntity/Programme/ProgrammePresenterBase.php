@@ -35,6 +35,11 @@ abstract class ProgrammePresenterBase extends Presenter
         return $this->programme;
     }
 
+    public function hasFutureAvailability(): bool
+    {
+        return $this->programme instanceof ProgrammeItem && $this->programme->hasFutureAvailability();
+    }
+
     public function isAvailable(): bool
     {
         return ($this->programme instanceof ProgrammeItem && $this->programme->hasPlayableDestination());

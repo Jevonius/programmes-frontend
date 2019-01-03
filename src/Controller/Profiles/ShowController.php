@@ -14,6 +14,7 @@ use BBC\ProgrammesPagesService\Domain\ValueObject\Pid;
 use BBC\ProgrammesPagesService\Service\CoreEntitiesService;
 use GuzzleHttp\Promise\FulfilledPromise;
 use Symfony\Component\HttpFoundation\Request;
+use InvalidArgumentException;
 
 class ShowController extends BaseController
 {
@@ -39,8 +40,12 @@ class ShowController extends BaseController
 
         $guid = $isiteKeyHelper->convertKeyToGuid($key);
 
-        /** @var IsiteResult $isiteResult */
-        $isiteResult = $isiteService->getByContentId($guid, $preview)->wait(true);
+        try {
+            /** @var IsiteResult $isiteResult */
+            $isiteResult = $isiteService->getByContentId($guid, $preview)->wait(true);
+        } catch (InvalidArgumentException $e) {
+            throw $this->createNotFoundException('No profiles found for guid.');
+        }
 
         /** @var Profile $profile */
         $profiles = $isiteResult->getDomainModels();

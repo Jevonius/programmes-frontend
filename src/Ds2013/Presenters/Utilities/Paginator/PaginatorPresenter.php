@@ -60,6 +60,20 @@ class PaginatorPresenter extends Presenter
     }
 
     /**
+     * The mobile class should be applied to page items if they are where
+     * a spacer should be on tablets up, but the spacer is not shown as
+     * the previous and next items are only two apart.
+     * @param int $item The page number of the item to be checked.
+     * @return bool
+     */
+    public function shouldApplyMobileClass(int $item): bool
+    {
+        $pages = $this->getPageCount();
+        $currentPage = $this->currentPage;
+        return ($item === 2 || $item === $pages - 1) && ($currentPage === 5 || $currentPage === $pages - 4);
+    }
+
+    /**
      * This method builds the pagination items that are going to be shown.
      * @return array
      */
@@ -73,16 +87,16 @@ class PaginatorPresenter extends Presenter
 
         if ($this->normalSpacerStartHiddenSpacerEnd()) {
             $numberOfPagesAfterSpacer = max(5, ($pages - $this->currentPage) + 3);
-            return array_merge([1, 'spacer'], range($pages - ($numberOfPagesAfterSpacer - 1), $pages - 1), ['spacer-hidden', $pages]);
+            return array_merge([1, 'spacer'], range($pages - ($numberOfPagesAfterSpacer - 1), $pages - 1), ['spacer-mobile', $pages]);
         }
 
         if ($this->hiddenSpacerStartNormalSpacerEnd()) {
             $numberOfPagesBeforeSpacer = max(5, $this->currentPage + 2);
-            return array_merge([1, 'spacer-hidden'], range(2, $numberOfPagesBeforeSpacer), ['spacer', $pages]);
+            return array_merge([1, 'spacer-mobile'], range(2, $numberOfPagesBeforeSpacer), ['spacer', $pages]);
         }
 
         if ($this->hiddenSpacerBothEnds()) {
-            return array_merge([1, 'spacer-hidden'], range(2, $pages -1), ['spacer-hidden', $pages]);
+            return array_merge([1, 'spacer-mobile'], range(2, $pages -1), ['spacer-mobile', $pages]);
         }
 
         if ($this->spacerAtStartOnly()) {
@@ -96,12 +110,24 @@ class PaginatorPresenter extends Presenter
         }
 
         if ($this->hiddenSpacerAtStart()) {
-            return array_merge([1, 'spacer-hidden'], range(2, $pages));
+            $currentPage = $this->currentPage;
+            if ($currentPage === 4 || $currentPage === 5) {
+                $spacer = 'spacer-mobile';
+            } else {
+                $spacer = 'spacer-hidden';
+            }
+            return array_merge([1, $spacer], range(2, $pages));
         }
 
         if ($this->hiddenSpacerAtEnd()) {
-            $numberOfPagesBeforeSpacer = max($this->getPageCount() === 7 ? 6 : 5, $this->currentPage + 2);
-            return array_merge(range(1, $numberOfPagesBeforeSpacer), ['spacer-hidden', $pages]);
+            $currentPage = $this->currentPage;
+            if ($currentPage === $pages - 3 || $currentPage === $pages - 4) {
+                $spacer = 'spacer-mobile';
+            } else {
+                $spacer = 'spacer-hidden';
+            }
+            $numberOfPagesBeforeSpacer = max($pages === 7 ? 6 : 5, $this->currentPage + 2);
+            return array_merge(range(1, $numberOfPagesBeforeSpacer), [$spacer, $pages]);
         }
 
         return array_merge([1, 'spacer'], range($this->currentPage - 2, $this->currentPage + 2), ['spacer', $pages]);

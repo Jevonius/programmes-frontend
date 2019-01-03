@@ -54,7 +54,7 @@ abstract class IsiteService
                 ->setAllowNonLive(true);
         }
 
-        $cacheKey = $this->clientFactory->keyHelper(__CLASS__, __FUNCTION__, $guid, $preview);
+        $cacheKey = $this->clientFactory->keyHelper(get_class($this), __FUNCTION__, $guid, $preview);
 
         $client = $this->clientFactory->getHttpApiMultiClient(
             $cacheKey,
@@ -100,7 +100,7 @@ abstract class IsiteService
 
         $url = $this->baseUrl . $query->getPath();
 
-        $cacheKey = $this->clientFactory->keyHelper(__CLASS__, __FUNCTION__, $programme->getPid(), $page, $limit);
+        $cacheKey = $this->clientFactory->keyHelper(get_class($this), __FUNCTION__, $programme->getPid(), $page, $limit);
 
         $client = $this->clientFactory->getHttpApiMultiClient(
             $cacheKey,
@@ -169,7 +169,7 @@ abstract class IsiteService
             $cacheKeys[] = $object->getFileId();
         }
 
-        $cacheKey = $this->clientFactory->keyHelper(__CLASS__, __FUNCTION__, implode(',', $cacheKeys), $page, $limit);
+        $cacheKey = $this->clientFactory->keyHelper(get_class($this), __FUNCTION__, implode(',', $cacheKeys), $page, $limit);
 
         $client = $this->clientFactory->getHttpApiMultiClient(
             $cacheKey,

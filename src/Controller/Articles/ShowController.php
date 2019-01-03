@@ -10,7 +10,6 @@ use App\ExternalApi\Isite\Domain\Article;
 use App\ExternalApi\Isite\IsiteResult;
 use App\ExternalApi\Isite\Service\ArticleService;
 use BBC\ProgrammesPagesService\Domain\Entity\Group;
-use BBC\ProgrammesPagesService\Domain\Entity\Programme;
 use BBC\ProgrammesPagesService\Service\CoreEntitiesService;
 use App\Exception\HasContactFormException;
 use Symfony\Component\HttpFoundation\Request;
