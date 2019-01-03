@@ -56,8 +56,9 @@ class ImagePresenter extends Presenter
         $this->sizes = $this->buildSizes($sizes);
     }
 
-    public function hasImage(){
-        if ($this->imagePid !==''){
+    public function hasImage()
+    {
+        if ($this->imagePid !== '') {
             return true;
         }
         return false;
