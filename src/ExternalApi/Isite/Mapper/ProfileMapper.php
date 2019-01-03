@@ -5,6 +5,7 @@ namespace App\ExternalApi\Isite\Mapper;
 
 use App\Controller\Helpers\IsiteKeyHelper;
 use App\ExternalApi\Isite\Domain\Profile;
+use App\ExternalApi\Isite\WrongEntityTypeException;
 use InvalidArgumentException;
 use Psr\Log\LoggerInterface;
 use SimpleXMLElement;
@@ -20,7 +21,7 @@ class ProfileMapper extends Mapper
         $guid = $this->getString($resultMetaData->guid);
         $key = $this->isiteKeyHelper->convertGuidToKey($guid);
         if (!$this->isProfile($resultMetaData)) {
-            throw new InvalidArgumentException(
+            throw new WrongEntityTypeException(
                 sprintf(
                     "iSite form with guid %s attempted to be mapped as profile, but is not a profile, is a %s",
                     $guid,

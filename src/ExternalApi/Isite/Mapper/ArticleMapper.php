@@ -4,6 +4,7 @@ declare(strict_types = 1);
 namespace App\ExternalApi\Isite\Mapper;
 
 use App\ExternalApi\Isite\Domain\Article;
+use App\ExternalApi\Isite\WrongEntityTypeException;
 use InvalidArgumentException;
 use SimpleXMLElement;
 
@@ -17,7 +18,7 @@ class ArticleMapper extends Mapper
         $resultMetaData = $this->getMetaData($isiteObject);
         $guid = $this->getString($resultMetaData->guid);
         if (!$this->isArticle($resultMetaData)) {
-            throw new InvalidArgumentException(
+            throw new WrongEntityTypeException(
                 sprintf(
                     "iSite form with guid %s attempted to be mapped as article, but is not a article, is a %s",
                     $guid,

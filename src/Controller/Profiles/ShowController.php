@@ -39,13 +39,8 @@ class ShowController extends BaseController
         }
 
         $guid = $isiteKeyHelper->convertKeyToGuid($key);
-
-        try {
-            /** @var IsiteResult $isiteResult */
-            $isiteResult = $isiteService->getByContentId($guid, $preview)->wait(true);
-        } catch (InvalidArgumentException $e) {
-            throw $this->createNotFoundException('No profiles found for guid.');
-        }
+        /** @var IsiteResult $isiteResult */
+        $isiteResult = $isiteService->getByContentId($guid, $preview)->wait(true);
 
         /** @var Profile $profile */
         $profiles = $isiteResult->getDomainModels();
