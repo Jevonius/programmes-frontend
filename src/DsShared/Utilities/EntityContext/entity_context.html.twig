@@ -1,6 +1,6 @@
 {%- for item in entity_context.getAncestry() -%}
     <a class="context__item" href="{{ path('find_by_pid', {'pid': item.getPid()}) }}"
-        {{- not entity_context.getOption('is_tabbable') ? ' tabindex="-1"' -}}
+        {{- loop.first ? ' tabindex="-1"' -}}
     >
        {{- item.getTitle() -}}
     </a>

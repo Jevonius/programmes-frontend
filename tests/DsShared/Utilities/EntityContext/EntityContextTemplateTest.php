@@ -31,9 +31,9 @@ class EntityContextTemplateTest extends BaseTemplateTestCase
 
         return [
             'one item' => [$greatGrandparent, '<a class="context__item" href="/programmes/b0000001" tabindex="-1">great-grandparent</a>'],
-            'two items' => [$grandparent, '<a class="context__item" href="/programmes/b0000001" tabindex="-1">great-grandparent</a> <a class="context__item" href="/programmes/b0000002" tabindex="-1">grandparent</a>'],
-            'three items' => [$parent, '<a class="context__item" href="/programmes/b0000001" tabindex="-1">great-grandparent</a> <a class="context__item" href="/programmes/b0000002" tabindex="-1">grandparent</a>, <a class="context__item" href="/programmes/b0000003" tabindex="-1">parent</a>'],
-            'four items' => [$child, '<a class="context__item" href="/programmes/b0000001" tabindex="-1">great-grandparent</a> <a class="context__item" href="/programmes/b0000002" tabindex="-1">grandparent</a>, <a class="context__item" href="/programmes/b0000003" tabindex="-1">parent</a>, <a class="context__item" href="/programmes/b0000004" tabindex="-1">child</a>'],
+            'two items' => [$grandparent, '<a class="context__item" href="/programmes/b0000001" tabindex="-1">great-grandparent</a> <a class="context__item" href="/programmes/b0000002">grandparent</a>'],
+            'three items' => [$parent, '<a class="context__item" href="/programmes/b0000001" tabindex="-1">great-grandparent</a> <a class="context__item" href="/programmes/b0000002">grandparent</a>, <a class="context__item" href="/programmes/b0000003">parent</a>'],
+            'four items' => [$child, '<a class="context__item" href="/programmes/b0000001" tabindex="-1">great-grandparent</a> <a class="context__item" href="/programmes/b0000002">grandparent</a>, <a class="context__item" href="/programmes/b0000003">parent</a>, <a class="context__item" href="/programmes/b0000004">child</a>'],
         ];
     }
 

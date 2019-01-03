@@ -10,7 +10,6 @@ class EntityContextPresenter extends Presenter
 {
     protected $options = [
         'include_self' => true,
-        'is_tabbable' => false,
     ];
 
     /** @var CoreEntity[] */
