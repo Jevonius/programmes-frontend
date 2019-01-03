@@ -142,7 +142,7 @@ gulp.task('watch',function() {
     throwError = false;
 
     gulp.watch(
-        [staticPathSrc + sassMatch, 'src/**/*.scss'],
+        [staticPathSrc + sassMatch, 'src/**/*.scss']
     ).on('change', function() {
         let series = gulp.series('watch');
         series();
