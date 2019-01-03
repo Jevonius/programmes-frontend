@@ -82,36 +82,36 @@
                             <h2>{{ tr('podcasts_desc') }}</h2>
                         </div>
                         <ul class="list-unstyled">
-                        {% for downloadableVersion in downloadableVersions %}
-                            {% if loop.first %}
-                                {% set imageClasses ='programme__img--nomax 1/4@bpb1 1/4@bpb2 1/2@bpw' %}
+                            {% for downloadableVersion in downloadableVersions %}
+                                {% if loop.first %}
+                                    {% set imageClasses ='programme__img--nomax 1/4@bpb1 1/4@bpb2 1/2@bpw' %}
 
-                            {% else %}
-                                {% set imageClasses='1/4@bpb1 1/4@bpb2-one-quarter 1/3@bpw' %}
-                            {% endif %}
-                            <li class="">
-                                {{ ds2013('programme', downloadableVersion.programmeItem,{
+                                {% else %}
+                                    {% set imageClasses='1/4@bpb1 1/4@bpb2-one-quarter 1/3@bpw' %}
+                                {% endif %}
+                                <li>
+                                    {{ ds2013('programme', downloadableVersion.programmeItem,{
 
-                                        'highlight_box_classes': 'highlight-box--list',
-                                        'context_programme': programme,
-                                        'body_options': {
-                                            'show_release_date': true,
-                                            'body_suffix': ds2013('download', downloadableVersion.programmeItem, downloadableVersion, podcast, {
-                                                'classes': 'block-link__link programme__favourites centi'
-                                            }),
-                                        },
-                                        title_options: {
-                                            'title_tag': 'h4',
-                                            'title_format':'item::ancestry'
-                                        },
-                                        image_options: {
-                                                'classes': imageClasses,
+                                            'highlight_box_classes': 'highlight-box--list',
+                                            'context_programme': programme,
+                                            'body_options': {
+                                                'show_release_date': true,
+                                                'body_suffix': ds2013('download', downloadableVersion.programmeItem, downloadableVersion, podcast, {
+                                                    'classes': 'block-link__link programme__favourites centi'
+                                                }),
                                             },
+                                            title_options: {
+                                                'title_tag': 'h4',
+                                                'title_format':'item::ancestry'
+                                            },
+                                            image_options: {
+                                                    'classes': imageClasses,
+                                                },
 
-                                    }) }}
-                            </li>
-                        {% endfor %}
-                    </ul>
+                                        }) }}
+                                </li>
+                            {% endfor %}
+                        </ul>
                     </div>
                     {%- if paginatorPresenter -%}
                         {{ ds2013_presenter(paginatorPresenter) }}
